@@ -2,9 +2,9 @@ Here is the MD simulation code written in C to simulate a polymer chain that I m
 
 _Note:_
 
-[1] It is just an attempt and doesn't contains sofisticated thermostats or other crucial potentials necessary to completely replicate a polymer chain.
+[1] It is just an attempt and doesn't contain sophisticated thermostats or other crucial potentials necessary to completely replicate a polymer chain.
 
-[2] After cloming the git, compile the [Makefile](Makefile) and run it using ./a.out
+[2] After cloning the git, compile the [Makefile](Makefile) and run it using ./a.out
 
 [3] For any issue, please contact me via. debarshibose100@gmail.com
 
@@ -13,7 +13,7 @@ _Note:_
 
 Molecular Dynamics (MD) simulations are a crucial computational technique for investigating the dynamic behaviours and properties of biomolecular systems. During my project time period, I developed an MD simulation code which simulates the gaseous molecule, initially having a lattice-like structure. The developed code shows energy conservation, regenerating the gaseous radial distribution and diffusion as gaseous particles validated by mean square displacement following the periodic boundary condition in a cubic box. 
 
-Further, I did a literature search on applying the isothermal condition using Langevin dynamics. In the extension of my work, I applied harmonic potential between adjacent molecules such that it can mimic a polymer chain, based on which my final analyses are made. The project was helpful for a better understanding of potential's physical significance which would be beneficial to understand the behaviour of complex biological systems far from equilibrium. This project underscores the role of MD simulations in advancing structural biology, revealing functional attributes based on dynamic structural changes and offering valuable insights for both basic and applied sciences.
+Further, I did a literature search on applying the isothermal condition using Langevin dynamics. In the extension of my work, I applied harmonic potential between adjacent molecules such that it can mimic a polymer chain, based on which my final analyses are made. The project was helpful for a better understanding of potential's physical significance, which would be beneficial to understand the behaviour of complex biological systems far from equilibrium. This project underscores the role of MD simulations in advancing structural biology, revealing functional attributes based on dynamic structural changes and offering valuable insights for both basic and applied sciences.
 
 ---
 
@@ -37,15 +37,15 @@ $$F_{i} = M\Delta x/(\Delta t)^{2} + \gamma M\Delta x/\Delta t - 2k_{B}T\gamma M
 
 Note that here $\eta(t)$ represents a random force which follows a Gaussian distribution and $\gamma$ represents the frictional coefficient.
 
-Until this, a very basic system of particles has been created which would thus be modified to mimic some specific system. For this purpose, several potentials are applied to specifically modify the system. Based on the potentials applied, the forces are then updated.
+Until this, a very basic system of particles has been created, which would thus be modified to mimic some specific system. For this purpose, several potentials are applied to specifically modify the system. Based on the potentials applied, the forces are then updated.
 
-**Lennard-Jones (LJ) Potential** is a short-range repulsive force that is applied to a particle pair, which are within a cut-off distance.
+**Lennard-Jones (LJ) Potential** is a short-range repulsive force that is applied to a particle pair which are within a cut-off distance.
 
 $$V_{LJ}(r) = 4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^{6}\right]$$
 
 This provides a volume for each particle from which other particles are kept excluded, hence termed "excluded volume". The computational cost is also minimised since LJ potential is only applied to selective particle pairs (those within the cutoff distance). The system at this stage resembles a group of non-bonded particles which would behave like those in a gaseous state.
 
-**Bond potential** is a harmonic potential which is applied between each adjacent particle, to replicate the spring-like motion of the covalently bonded particles. Thus the particles are then provided with bonds and hence the system resembles that of a polymer. The initialization as done for this case involves arranging the particles in a linear fashion and then letting them evolve under the simulation conditions.
+**Bond potential** is a harmonic potential which is applied between each adjacent particle to replicate the spring-like motion of the covalently bonded particles. Thus the particles are then provided with bonds, and hence the system resembles that of a polymer. The initialization as done for this case involves arranging the particles in a linear fashion and then letting them evolve under the simulation conditions.
 
 $$V_{bond}(r) = k_{bond}(r - r_{0})^{2}\,/\,2$$
 
