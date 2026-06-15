@@ -83,6 +83,10 @@ $$P.E = V_{LJ}(r) + V_{bond}(r)$$
 
 ![](./energy.png)
 
+_Fig 1. The energy graph is plotted for 100 bonded particles by considering the Potential
+Energies due to Lennard-Jones potential & Bond potential; Kinetic Energy, and the Total
+Energy of the system, for a duration of 500,000 simulation timestep._
+
 With respect to simulation, the **Temperature of the system** is a representation of the change in the kinetic energy of the particles and is synchronous with it. The instantaneous temperature of the system fluctuates with that of the total kinetic energy.
 
 $$k_{B}T(t) = \sum_{i=1}^{N} \frac{m_{i}v_{\alpha,i}^{2}(t)}{N_{f}}$$
@@ -90,6 +94,9 @@ $$k_{B}T(t) = \sum_{i=1}^{N} \frac{m_{i}v_{\alpha,i}^{2}(t)}{N_{f}}$$
 where $k_{B}$ represents the Boltzmann constant and $T$ is the temperature of the system containing $N$ particles (with $N_f$ degrees of freedom), each with velocities $v_{i}$.
 
 ![](./temperature.png)
+
+_Fig 2. Change in instantaneous temperature of the system plotted against the simulation
+timestep of 500,000._
 
 **Standard Deviation (SD)** is the variation of the data about their statistical mean. It is used here to observe the variation of the positions of the particles about the centre of mass of the system, during the course of the simulation. Low SD values indicate that there haven't been many deviations in the positions of the particles whereas high SD values indicate the opposite.
 
@@ -99,6 +106,8 @@ $\sigma$ stands for the Standard Deviation calculated for $N$ number of particle
 
 ![](./SD.png)
 
+_Fig 3. SD plotted for 100 particles observed for a simulation timestep of 500,000._
+
 The **Radial Distribution Function** $g(r)$ is used to find the probability of finding a particle, based on the distribution of particles in the system (number density), which varies with respect to a reference particle. The distance between a pair of particles plays a crucial role in the calculation of $g(r)$, which is then normalized relative to that of an ideal gas. This is highly crucial to validate the simulation with experiments since the $g(r)$ value can be obtained with light-scattering experiments.
 
 $$g(r) = \frac{N}{V}\,4\pi r^{2}\,\Delta N$$
@@ -106,6 +115,8 @@ $$g(r) = \frac{N}{V}\,4\pi r^{2}\,\Delta N$$
 $N$ represents the number of particles, $V$ represents the volume of the system and $\Delta V$ represents the volume of the shell at the distance $r$.
 
 ![](./rdf.png)
+
+_Fig 4. RDF or g(r) plotted for the particles in the system against the radial distance r._
 
 **Diffusion** is a process whereby a set of particles gets uniformly distributed throughout the system over time. It is caused by the molecular motion of the particles in a solvent and is a product of the Brownian motion of the particles. As suggested by the relationship between diffusion coefficient and MSD derived by Einstein, the simplest way to quantitate it in a computer simulation is via calculating the ensemble average of the mean squared displacement of the particles:
 
@@ -115,15 +126,34 @@ $N$ is the number of particles in the system with $\Delta r$ the change in posit
 
 ![](./msd.png)
 
+_Fig 5. MSD for particles obtained and plotted in log scale against simulation timesteps._
+
 **Structure visualization** was done using Pymol Software. The initial position of each bead was assigned such that it represented a linear filament, and snapshots were taken as the system evolved.
 
 ![](./movie/t=0.png)
+t = 0 
+
 ![](./movie/t=30800.png)
+t = 30800
+
 ![](./movie/t=62600.png)
+t = 62600
+
 ![](./movie/t=208000.png)
+t = 208000 
+
 ![](./movie/t=326200.png)
+t = 326200
+
 ![](./movie/t=428200.png)
+t = 428200 
+
 ![](./movie/t=495400.png)
+t = 495400
+
+_Fig 6. Snapshots of the filament containing 100 bonded beads, under simulation for
+500,000 timesteps (t)._
+
 
 ---
 
