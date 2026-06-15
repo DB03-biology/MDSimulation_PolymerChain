@@ -1,110 +1,150 @@
+Here is the MD simulation code written in C to simulate a polymer chain that I made during my IAS SRFP Project 2024. The project was conducted under the guidance of Dr. Arnab Bhattacharjee at SCIS of JNU, New Delhi, India. 
+
+_Note:_
+
+[1] It is just an attempt and doesn't contains sofisticated thermostats or other crucial potentials necessary to completely replicate a polymer chain.
+
+[2] After cloming the git, compile the [Makefile](Makefile) and run it using ./a.out
+
+[3] For any issue, please contact me via. debarshibose100@gmail.com
+
+---
 ## Abstract
 
-Computational modeling of polymers provides deep insights into their structural, thermodynamic, and dynamic properties. This project focuses on simulating a polymer chain using Langevin dynamics, which incorporates implicit solvation effects to model the solvent-protein interactions realistically. The primary objective was to observe the structural configurations and evolution of the polymer under various potentials.
+Molecular Dynamics (MD) simulations are a crucial computational technique for investigating the dynamic behaviours and properties of biomolecular systems. During my project time period, I developed an MD simulation code which simulates the gaseous molecule, initially having a lattice-like structure. The developed code shows energy conservation, regenerating the gaseous radial distribution and diffusion as gaseous particles validated by mean square displacement following the periodic boundary condition in a cubic box. 
 
-The simulation workflow began with the initialization of particles in a linear fashion, evolving under standard simulation conditions. The Verlet integration algorithm, modified for Langevin dynamics, was employed to update particle positions and trajectories. The system's configurations were modulated by introducing specific potentials sequentially: Lennard-Jones (LJ) potential for short-range repulsive forces and excluded volume effects, Bond potential for spring-like covalent interactions, Bending potential to restrict angular movements, and Torsional potential to capture dihedral rotation complexities.
-
-Data collected during the simulation allowed for comprehensive analysis. Structural properties were evaluated through the Root Mean Square Deviation (RMSD) and Radius of Gyration ($R_g$), providing metrics on structural stability and compactness. Contact maps were generated to visualize the distance profiles and folding patterns of the chain. Thermodynamic stability was monitored via kinetic energy, instantaneous temperature, and total potential energy, ensuring energy conservation and proper thermal coupling.
-
-The results successfully demonstrated the transition of the system from an unbonded gaseous state to a structured, polymer-like conformation, highlighting the critical role of specific potentials in molecular organization and folding behaviors.
+Further, I did a literature search on applying the isothermal condition using Langevin dynamics. In the extension of my work, I applied harmonic potential between adjacent molecules such that it can mimic a polymer chain, based on which my final analyses are made. The project was helpful for a better understanding of potential's physical significance which would be beneficial to understand the behaviour of complex biological systems far from equilibrium. This project underscores the role of MD simulations in advancing structural biology, revealing functional attributes based on dynamic structural changes and offering valuable insights for both basic and applied sciences.
 
 ---
 
 ## Methodologies
 
-The forces ($f$) applied on a system of particles created are used to update the position ($r$) of each particle and obtain their trajectories, the Verlet algorithm (modified for Langevin dynamics) is used. It is an algorithm whose solution is at par with Newtonian mechanics and involves a Taylor expansion and its approximation (Frenkel & Smit, 2023). The new velocity ($v$) is also calculated based on the new position thus obtained.
+The initialisation of the system is done by positioning the particles on a cubic lattice, making sure that their cores don't overlap. The initial velocities of the particles are generated following a Maxwell–Boltzmann distribution, which would be distributed within a range of $[-0.05, 0.05]$. The velocities are then shifted in such a way as to maintain the thermal equilibrium of the system:
 
-$$r_{n+1} \approx 2r_n - r_{n-1} + \frac{f}{m}\Delta t^2$$
+$$\langle v_{\alpha}^{2} \rangle = k_{B}T/m$$
 
-$$v_n \approx \frac{r_{n+1} - r_{n-1}}{2\Delta t}$$
+The forces ($f$) applied on a system of particles created are used to update the position ($r$) of each particle and obtain their trajectories; the Verlet algorithm (modified for Langevin dynamics) is used. It is an algorithm whose solution is at par with Newtonian mechanics and involves a Taylor expansion and its approximation:
+
+$$r_{n+1} \approx 2r_{n} - r_{n-1} + \frac{f}{m}\Delta t^{2}$$
+
+$$v_{n} \approx \frac{(r_{n+1} - r_{n-1})}{2\Delta t}$$
 
 In the simulation, only the velocities have been used to calculate the Kinetic Energy of the particles and thus the instantaneous temperature of the system.
 
-$$\langle v_\alpha^2 \rangle = k_B T / m$$
+Langevin equations could be integrated into the system in order to provide an implicit solvation to the set of particles:
 
-Langevin equations could be integrated into the system in order to provide an implicit solvation to the set of particles (Leach, 2009);
+$$F_{i} = M\Delta x/(\Delta t)^{2} + \gamma M\Delta x/\Delta t - 2k_{B}T\gamma M\,\eta(t)$$
 
-$$F_i = M\Delta x / (\Delta t)^2 + \gamma M\Delta x / \Delta t - \sqrt{2k_B T \gamma M}\,\eta(t)$$
+Note that here $\eta(t)$ represents a random force which follows a Gaussian distribution and $\gamma$ represents the frictional coefficient.
 
-to specifically modify the system. Based on the potentials applied, the forces are then updated.
+Until this, a very basic system of particles has been created which would thus be modified to mimic some specific system. For this purpose, several potentials are applied to specifically modify the system. Based on the potentials applied, the forces are then updated.
 
-Lennard-Jones (LJ) Potential is a short-range repulsive force that is applied to a particle pair, which are within a cut-off distance.
+**Lennard-Jones (LJ) Potential** is a short-range repulsive force that is applied to a particle pair, which are within a cut-off distance.
 
-$$V_{LJ}(r) = 4\varepsilon \left[ (\sigma/r)^{12} - (\sigma/r)^6 \right]$$
+$$V_{LJ}(r) = 4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^{6}\right]$$
 
-This provides a volume for each particle from which other particles are kept excluded, hence termed "excluded volume". The computational cost is also minimised since the potential is only applied to selective particle pairs (those within the cutoff distance). The system at this stage resembles a group of non-bonded particles which would behave like those in a gaseous state.
+This provides a volume for each particle from which other particles are kept excluded, hence termed "excluded volume". The computational cost is also minimised since LJ potential is only applied to selective particle pairs (those within the cutoff distance). The system at this stage resembles a group of non-bonded particles which would behave like those in a gaseous state.
 
-Bond potential is a harmonic potential which is applied between each adjacent particle to replicate the spring-like motion of the covalently bonded particles (3.1: Potential Energy Surface and Bonding Interactions, 2022). Thus the particles are then provided with bonds and hence the system resembles that of a polymer. The initialization as done for this case involves arranging the particles in a linear fashion and then letting them evolve under simulation conditions.
+**Bond potential** is a harmonic potential which is applied between each adjacent particle, to replicate the spring-like motion of the covalently bonded particles. Thus the particles are then provided with bonds and hence the system resembles that of a polymer. The initialization as done for this case involves arranging the particles in a linear fashion and then letting them evolve under the simulation conditions.
 
-$$V_{bond}(r) = k_{bond}(r - r_0)^2 / 2$$
+$$V_{bond}(r) = k_{bond}(r - r_{0})^{2}\,/\,2$$
 
 Other types of potentials that could be added between bonded particles involve:
 
-* **Bending potential** is applied to a system to restrict the movement of the angles of the particles in the chain within a certain range. Bend potential is also a harmonic potential which acts between three consecutive particles having two adjacent bonds, which governs the deviation of the angle ($\theta$) between those three particles from the initial angle ($\theta_0$).
-  
-  $$V_{bend}(\theta) = k_{bend}(\theta - \theta_0)^2 / 2$$
+* **Bending potential** is applied to a system to restrict the movement of the angles of the particles in the chain within a certain range. Bend potential is also a harmonic potential which acts between three consecutive particles having two adjacent bonds, which governs the deviation of the angle ($\theta$) between those three particles from the initial angle ($\theta_{0}$).
 
-* **Torsional potential** quantifies the energy associated with the rotation around a chemical bond. This energy is influenced by factors such as bond type, neighbouring atoms, and lone electron pairs. To accurately capture the complexities of torsional interactions, the potential is often represented as a Fourier series summation of multiple terms. It is a function of the dihedral angle ($\omega$), which is the angle between two planes defined by three consecutive atoms in a molecule.
-  
-  $$V_{torsion} = k_{torsion}^2 [1 - \cos(n\omega - \gamma)]$$
-  
-  where $\gamma$ being the phase factor.
+  $$V_{bend}(\theta) = k_{bend}(\theta - \theta_{0})^{2}\,/\,2$$
 
-The force acting on each particle is thus computed based on these potentials, for all dimensions.
+* **Torsional potential** quantifies the energy associated with the rotation around a chemical bond. This energy is influenced by factors such as bond order, neighbouring atoms, and lone electron pairs. To accurately capture the complexities of torsional interactions, the potential is often represented as a Fourier series summation of multiple terms. It is a function of the dihedral angle ($\omega$), which is the angle between two planes defined by three consecutive atoms in a molecule.
 
-### Periodic Boundary Conditions (PBC)
-Periodic Boundary Conditions (PBC) are applied to simulate an infinite system using a finite simulation box. When a particle moves out of the simulation box, it re-enters from the opposite side with the same velocity. Similarly, interactions between particles are calculated considering their periodic images, ensuring that particles near the boundaries interact with particles on the opposite side of the box, eliminating edge effects and mimicking bulk properties.
+  $$V_{torsion} = \frac{k_{torsion}}{2}\left[1 - \cos(n\omega - \gamma)\right]$$
 
-### Structural Analysis Metrics
-To characterize the conformation and structural changes of the polymer chain, the following metrics were computed throughout the simulation:
+  where $\gamma$ is the phase factor.
 
-* **Root Mean Square Deviation (RMSD):** Measures the average distance between the atoms of a superimposed conformation and a reference structure, indicating structural stability and deviation over time.
-* **Radius of Gyration ($R_g$):** Quantifies the compactness of the polymer chain, defined as the root mean square distance of the collection of particles from their common center of mass.
-* **Contact Maps:** A two-dimensional representation that visualizes the distance profile between all pairs of particles in the chain, highlighting local and long-range structural folding patterns.
+The force acting on each particle is thus computed based on these potentials, for all 3 dimensions.
+
+**Periodic Boundary Conditions (PBC)** is applied to the system as it replicates the simulation box infinitely in all directions in order to eliminate surface effects, which can significantly distort the properties of a small system. This allows for the study of bulk properties, such as density, pressure, and diffusion coefficients, without the influence of artificial boundaries. In three dimensions, 26 nearest neighbours will thus be surrounding each box. 
+
+In such a case, if a particle exits the box during the simulation time, its image particle will enter the box from the opposite side by maintaining the coordinates of the other axes. PBC is initially applied to individual particles of the system when the simulation is conducted for non-bonded particles and is removed after the polymer chain construction by application of the bond potential.
+
+The system thus prepared is a microcanonical ensemble, for which we observe the energy fluctuation of the system as it evolves throughout the simulation time period. The system has a constant NVE (Particle-Volume-Energy), thus the total energy of the system is conserved.
 
 ---
 
-## Results and Analysis
+## Results & Analysis
 
-The simulation successfully demonstrated the evolution of a 20-particle chain under the sequential application of different physical potentials, transitioning from an unbonded gaseous system to a structured polymer-like conformation.
+The system prepared for the simulation was analysed statistically. Several methods of analysis were undertaken to test the system's behaviour and hence the data and plots were generated accordingly.
 
-### 1. Thermalization and Thermodynamic Stability
-The system was verified to achieve proper thermal equilibration matching the set simulation temperature. The instantaneous temperature, computed directly from particle velocities via the Equipartition theorem framework, fluctuated consistently around the target temperature, indicating that the stochastic and frictional terms in the Langevin integrator successfully balanced out to mimic a stable implicit solvent bath.
+The **Total Energy of the system** is the summation of all the potentials (P.E) applied to the particles and the kinetic energy (K.E) fluctuation due to changes in the velocities of the particles due to the application of the forces.
 
-### 2. Trajectory Profile and Conformation Evolution
+$$E_{total} = K.E + P.E$$
 
-#### Phase I: Non-Bonded Gas Conformation (LJ Only)
-Initially, with only the Lennard-Jones potential active, the particles experienced only short-range repulsions (excluded volume effects). The absence of structural bounds caused the system to act as a highly scattered, non-bonded gas. Particles diffused independently within the simulation box boundaries.
+$$P.E = V_{LJ}(r) + V_{bond}(r)$$
 
-#### Phase II: Linear Polymerization (LJ + Bond Potentials)
-Upon turning on the harmonic bond stretching potential, the particles tightly constrained themselves to their immediate neighbors at an equilibrium distance $r_0$. The system structurally transformed into a highly flexible, open linear chain. The snapshot profiles revealed a typical random-coil behavior, showing that the chain undergoes continuous conformational fluctuations.
+![](./energy.png)
 
-#### Phase III: Constrained Polymer Chain (LJ + Bond + Bending + Torsional Potentials)
-The application of angular bending and torsional potentials heavily restricted unhindered fluctuations. The chain lost its random-coil elasticity and adopted distinct structural geometries governed by the local structural stiffness ($k_{bend}$) and dihedral phase settings ($\gamma$).
+With respect to simulation, the **Temperature of the system** is a representation of the change in the kinetic energy of the particles and is synchronous with it. The instantaneous temperature of the system fluctuates with that of the total kinetic energy.
 
-### 3. Structural Analysis Metrics
+$$k_{B}T(t) = \sum_{i=1}^{N} \frac{m_{i}v_{\alpha,i}^{2}(t)}{N_{f}}$$
 
-* **Radius of Gyration ($R_g$) Analysis:** The time evolution of $R_g$ showed a sharp drop as the system moved from a scattered state to a bonded polymer chain. Once bonded, $R_g$ stabilized within a tight range, proving that the chain had collapsed into a compact, stable macromolecular conformation.
-* **RMSD Trajectory:** The Root Mean Square Deviation relative to the initial linear starting frame increased rapidly before plateauing. This steady plateau indicates that the polymer chain reached a stable equilibrium conformation and fluctuated around a well-defined native-like state without unphysical unfolding.
-* **Contact Maps:** The final contact maps showed strong diagonal patterns corresponding to immediate covalent neighbors ($i, i+1, i+2$). Crucially, off-diagonal interaction clusters emerged over longer simulation times, confirming the formation of stable long-range loops and structural bends brought on by the combined constraints of bending and torsional energies.
+where $k_{B}$ represents the Boltzmann constant and $T$ is the temperature of the system containing $N$ particles (with $N_f$ degrees of freedom), each with velocities $v_{i}$.
+
+![](./temperature.png)
+
+**Standard Deviation (SD)** is the variation of the data about their statistical mean. It is used here to observe the variation of the positions of the particles about the centre of mass of the system, during the course of the simulation. Low SD values indicate that there haven't been many deviations in the positions of the particles whereas high SD values indicate the opposite.
+
+$$\langle \sigma_{i}(t) \rangle = \sqrt{\frac{\displaystyle\sum_{i} \langle (x_{i}(t) - \mu)^{2} \rangle}{N}}$$
+
+$\sigma$ stands for the Standard Deviation calculated for $N$ number of particles, each having a position $x$ at time $t$, $\mu$ being the mean of all the positions at time $t$.
+
+![](./SD.png)
+
+The **Radial Distribution Function** $g(r)$ is used to find the probability of finding a particle, based on the distribution of particles in the system (number density), which varies with respect to a reference particle. The distance between a pair of particles plays a crucial role in the calculation of $g(r)$, which is then normalized relative to that of an ideal gas. This is highly crucial to validate the simulation with experiments since the $g(r)$ value can be obtained with light-scattering experiments.
+
+$$g(r) = \frac{N}{V}\,4\pi r^{2}\,\Delta N$$
+
+$N$ represents the number of particles, $V$ represents the volume of the system and $\Delta V$ represents the volume of the shell at the distance $r$.
+
+![](./rdf.png)
+
+**Diffusion** is a process whereby a set of particles gets uniformly distributed throughout the system over time. It is caused by the molecular motion of the particles in a solvent and is a product of the Brownian motion of the particles. As suggested by the relationship between diffusion coefficient and MSD derived by Einstein, the simplest way to quantitate it in a computer simulation is via calculating the ensemble average of the mean squared displacement of the particles:
+
+$$\langle \Delta r(t)^{2} \rangle = \frac{1}{N}\sum_{i=1}^{N} \Delta r_{i}(t)^{2}$$
+
+$N$ is the number of particles in the system with $\Delta r$ the change in position of each particle over time $t$.
+
+![](./msd.png)
+
+**Structure visualization** was done using Pymol Software. The initial position of each bead was assigned such that it represented a linear filament, and snapshots were taken as the system evolved.
+
+![](./movie/t=0.png)
+![](./movie/t=30800.png)
+![](./movie/t=62600.png)
+![](./movie/t=208000.png)
+![](./movie/t=326200.png)
+![](./movie/t=428200.png)
+![](./movie/t=495400.png)
 
 ---
 
-## Tools and Software
+## Tools & Softwares
 
-The entire simulation framework and numerical analysis pipeline were designed, written, and executed using the following software ecosystem:
+With the conceptualization mentioned beforehand, this code was generated in-house using the **C programming language**. It is a procedural programming language which consists of several functions and procedures to solve a problem.
 
-* **Python 3.x:** The core language used to write the molecular dynamics engine from scratch.
-* **NumPy:** Used extensively for managing high-dimensional coordinate arrays, matrix manipulation of vectors, and computing rapid vectorized particle-to-particle distances.
-* **Matplotlib:** Leveraged for data visualization, producing clear trajectory snapshots, potential energy convergence lines, $R_g$/RMSD time-series plots, and 2D interaction contact maps.
-* **Google Colab / Jupyter Notebooks:** The primary interactive scripting environment utilized for developing, debugging, and running the simulation cycles.
+Preparing the simulation by coding gives a much added benefit over the usage of the software as it provides flexibility, customization, and a much deeper understanding of the underlying algorithms. It allows us to tailor simulations to specific needs, optimize performance for unique systems, and implement novel methodologies. Such an approach enhances the ability to troubleshoot and modify the simulation, which is often limited when using pre-built software.
+
+**Gnuplot** (Version 6.0 patchlevel 1) was used for plotting the graphs from the data obtained from the simulations, thus allowing for the analysis of the results. It is a command-line and GUI (Graphical User Interface) program that can generate two and three-dimensional plots of functions, data, and data fits.
+
+**Pymol** (Version 3.0.0), a molecular structure visualization software, was used for the visual representation and analysis of the snapshots of the system with the evolving time. Two types of files were generated using the code, which involves a `.pdb` file containing the coordinates of the particles, which were updated at several equispaced time points throughout the simulation, and a `.pml` file containing the information about the bonds between the particles. These files were loaded in Pymol for visual analysis purposes.
 
 ---
 
 ## Conclusion
 
-This project successfully developed and implemented a molecular dynamics simulation of a polymer chain under implicit solvation using Langevin dynamics and a modified Verlet integration scheme. The model effectively captured the essential physics of polymer behavior through a stepwise introduction of molecular potentials.
+Many biological processes occur far from equilibrium, such as protein folding, enzyme activity, and the functioning of molecular motors. MD simulations can capture the conformational changes and interactions in these systems as they undergo dynamic transitions. This technique is thus in demand for structural and computational biologists in recent years. MD simulations provide a dynamic perspective of the static view of biomacromolecules, thereby unravelling many functional attributes based on structural changes.
 
-The simulation accurately captured the transition of the system from a chaotic, non-bonded gaseous state under pure Lennard-Jones interactions into a distinct, cohesive, and stable polymer architecture when harmonic bond stretching, angle bending, and torsional dihedral potentials were applied. Thermodynamic tracking confirmed that the Langevin thermostat successfully regulated system temperatures, while structural metrics like the Radius of Gyration ($R_g$), RMSD, and contact maps provided quantitative proof of chain compactness, structural stabilization, and localized folding configurations.
+In this project, I understood the process from scratch by developing a simplified model to mimic a polymer chain and validating it with experimentally available data. By implementing these simulations, I could observe molecular systems' dynamic behaviour and properties, providing insights into their functional roles and interactions.
 
-In conclusion, this computational framework provides a robust and verifiable baseline for exploring molecular mechanics. The insights gained demonstrate how local atomic-scale forces collectively guide the global macro-structural assemblies of long-chain macromolecular architectures. Future extensions can expand upon this codebase to investigate multi-chain aggregation, explicit solvent boundary conditions, or complex biomolecular protein folding pathways.
+This system could be further developed by changing the energy landscape of the system in a specific way so that the system could be made to be in high resemblance with that of active matter.
+
+Simulating molecular dynamics allows researchers to predict the time-dependent behaviour and response of systems in thermodynamically non-equilibrium conditions evolving towards equilibrium. This has significant implications for understanding the fundamental processes in biology and developing applications in medicine and materials science. The project demonstrated the potential of MD simulations in offering a detailed, dynamic view of biomolecular systems, highlighting their importance in contemporary biological research.
